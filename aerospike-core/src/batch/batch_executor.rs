@@ -64,19 +64,10 @@ impl BatchExecutor {
             Concurrency::MaxThreads(max) => cmp::min(max, jobs.len()),
         };
         let size = jobs.len() / threads;
-        let mut overhead = jobs.len() % threads;
         let last_err: Arc<Mutex<Option<Error>>> = Arc::default();
-        let mut slice_index = 0;
         let mut handles = vec![];
         let res = Arc::new(Mutex::new(vec![]));
-        for _ in 0..threads {
-            let mut thread_size = size;
-            if overhead >= 1 {
-                thread_size += 1;
-                overhead -= 1;
-            }
-            let slice = Vec::from(&jobs[slice_index..slice_index + thread_size]);
-            slice_index = thread_size + 1;
+        for slice in jobs.chunks(size).map(|c| c.to_vec()) {
             let last_err = last_err.clone();
             let res = res.clone();
             let handle = aerospike_rt::spawn(async move {
