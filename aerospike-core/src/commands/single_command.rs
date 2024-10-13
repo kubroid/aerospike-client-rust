@@ -111,7 +111,6 @@ impl<'a> SingleCommand<'a> {
             cmd.prepare_buffer(&mut conn)
                 .chain_err(|| "Failed to prepare send buffer")?;
             cmd.write_timeout(&mut conn, policy.timeout())
-                .await
                 .chain_err(|| "Failed to set timeout for send buffer")?;
 
             // Send command.

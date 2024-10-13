@@ -57,11 +57,7 @@ use crate::ResultCode;
 // Command interface describes all commands available
 #[async_trait::async_trait]
 pub trait Command {
-    async fn write_timeout(
-        &mut self,
-        conn: &mut Connection,
-        timeout: Option<Duration>,
-    ) -> Result<()>;
+    fn write_timeout(&mut self, conn: &mut Connection, timeout: Option<Duration>) -> Result<()>;
     fn prepare_buffer(&mut self, conn: &mut Connection) -> Result<()>;
     async fn get_node(&self) -> Result<Arc<Node>>;
     async fn parse_result(&mut self, conn: &mut Connection) -> Result<()>;

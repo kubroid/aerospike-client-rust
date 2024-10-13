@@ -97,7 +97,6 @@ impl BatchReadCommand {
             self.prepare_buffer(&mut conn)
                 .chain_err(|| "Failed to prepare send buffer")?;
             self.write_timeout(&mut conn, base_policy.timeout())
-                .await
                 .chain_err(|| "Failed to set timeout for send buffer")?;
 
             // Send command.
@@ -200,11 +199,7 @@ impl BatchReadCommand {
 
 #[async_trait::async_trait]
 impl commands::Command for BatchReadCommand {
-    async fn write_timeout(
-        &mut self,
-        conn: &mut Connection,
-        timeout: Option<Duration>,
-    ) -> Result<()> {
+    fn write_timeout(&mut self, conn: &mut Connection, timeout: Option<Duration>) -> Result<()> {
         conn.buffer.write_timeout(timeout);
         Ok(())
     }

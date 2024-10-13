@@ -182,7 +182,7 @@ impl StreamCommand {
 
 #[async_trait::async_trait]
 impl Command for StreamCommand {
-    async fn write_timeout(
+    fn write_timeout(
         &mut self,
         conn: &mut Connection,
         timeout: Option<Duration>,
