@@ -644,7 +644,8 @@ impl Client {
                 );
                 command.execute().await.unwrap();
             })
-            .await;
+            .await
+            .chain_err(|| "Spawn error")?;
         }
         Ok(recordset)
     }
@@ -688,7 +689,8 @@ impl Client {
             );
             command.execute().await.unwrap();
         })
-        .await;
+        .await
+        .chain_err(|| "Spawn error")?;
 
         Ok(recordset)
     }
@@ -742,7 +744,8 @@ impl Client {
                     QueryCommand::new(&policy, node, statement, t_recordset, partitions);
                 command.execute().await.unwrap();
             })
-            .await;
+            .await
+            .chain_err(|| "Spawn error")?;
         }
         Ok(recordset)
     }
@@ -774,7 +777,8 @@ impl Client {
             let mut command = QueryCommand::new(&policy, node, statement, t_recordset, partitions);
             command.execute().await.unwrap();
         })
-        .await;
+        .await
+        .chain_err(|| "Spawn error")?;
 
         Ok(recordset)
     }
