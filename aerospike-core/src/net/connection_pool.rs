@@ -20,8 +20,8 @@ use std::sync::Arc;
 use crate::errors::{Error, ErrorKind, Result};
 use crate::net::{Connection, Host};
 use crate::policy::ClientPolicy;
+use aerospike_rt::Mutex;
 use futures::executor::block_on;
-use futures::lock::Mutex;
 use std::collections::VecDeque;
 use std::time::Duration;
 

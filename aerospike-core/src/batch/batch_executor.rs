@@ -17,6 +17,8 @@ use std::cmp;
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use aerospike_rt::Mutex;
+
 use crate::batch::BatchRead;
 use crate::cluster::partition::Partition;
 use crate::cluster::{Cluster, Node};
