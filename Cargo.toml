@@ -53,4 +53,4 @@ lazy_static = "1.4"
 aerospike-macro = {path = "./aerospike-macro"}
 aerospike-rt = {path = "./aerospike-rt"}
 futures = {version = "0.3.16" }
-tokio = { version = "1.10.0", features = ["full"] }
+tokio = { version = "1.40.0", features = ["full"] }
