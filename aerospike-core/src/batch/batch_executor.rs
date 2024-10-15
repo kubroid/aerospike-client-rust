@@ -21,7 +21,7 @@ use crate::batch::BatchRead;
 use crate::cluster::partition::Partition;
 use crate::cluster::{Cluster, Node};
 use crate::commands::BatchReadCommand;
-use crate::errors::{Error, Result};
+use crate::errors::Result;
 use crate::policy::{BatchPolicy, Concurrency};
 use crate::Key;
 use futures::lock::Mutex;
@@ -64,28 +64,36 @@ impl BatchExecutor {
             Concurrency::MaxThreads(max) => cmp::min(max, jobs.len()),
         };
         let size = jobs.len() / threads;
-        let last_err: Arc<Mutex<Option<Error>>> = Arc::default();
-        let mut handles = vec![];
-        let res = Arc::new(Mutex::new(vec![]));
+        let mut handles: Vec<aerospike_rt::task::JoinHandle<Result<Vec<BatchReadCommand>>>> =
+            vec![];
         for slice in jobs.chunks(size).map(|c| c.to_vec()) {
-            let last_err = last_err.clone();
-            let res = res.clone();
             let handle = aerospike_rt::spawn(async move {
-                //let next_job = async { jobs.lock().await.next().await};
+                let mut res = Vec::with_capacity(slice.len());
                 for mut cmd in slice {
-                    if let Err(err) = cmd.execute().await {
-                        *last_err.lock().await = Some(err);
-                    };
-                    res.lock().await.push(cmd);
+                    cmd.execute().await?;
+                    res.push(cmd);
                 }
+                Ok(res)
             });
             handles.push(handle);
         }
-        futures::future::join_all(handles).await;
-        match Arc::try_unwrap(last_err).unwrap().into_inner() {
-            None => Ok(res.lock().await.to_vec()),
-            Some(err) => Err(err),
-        }
+        let res = futures::future::join_all(handles).await;
+
+        let res: Vec<BatchReadCommand> = res
+            .into_iter()
+            .map(|outer| match outer {
+                Ok(inner) => inner,
+                Err(e) => Err(format!("Join error {}", e).into()),
+            })
+            .map(|inner| match inner {
+                Ok(commands) => Ok(commands),
+                Err(e) => return Err(e),
+            })
+            .collect::<Result<Vec<Vec<BatchReadCommand>>>>()?
+            .into_iter()
+            .flatten()
+            .collect();
+        Ok(res)
     }
 
     async fn get_batch_nodes(
