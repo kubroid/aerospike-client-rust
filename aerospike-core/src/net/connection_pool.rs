@@ -61,27 +61,27 @@ impl Queue {
     }
 
     pub async fn get(&self) -> Result<PooledConnection> {
-        let mut internals = self.0.internals.lock().await;
         let connection;
         loop {
-            if let Some(IdleConnection(mut conn)) = internals.connections.pop_front() {
-                if conn.is_idle() {
-                    internals.num_conns -= 1;
-                    conn.close().await;
-                    continue;
+            {
+                let mut internals = self.0.internals.lock().await;
+
+                if let Some(IdleConnection(mut conn)) = internals.connections.pop_front() {
+                    if conn.is_idle() {
+                        internals.num_conns -= 1;
+                        conn.close().await;
+                        continue;
+                    }
+                    connection = conn;
+                    break;
                 }
-                connection = conn;
-                break;
+
+                if internals.num_conns >= self.0.capacity {
+                    bail!(ErrorKind::NoMoreConnections);
+                }
+
+                internals.num_conns += 1;
             }
-
-            if internals.num_conns >= self.0.capacity {
-                bail!(ErrorKind::NoMoreConnections);
-            }
-
-            internals.num_conns += 1;
-
-            // Free the lock to prevent deadlocking
-            drop(internals);
 
             let conn = aerospike_rt::timeout(
                 Duration::from_secs(5),
