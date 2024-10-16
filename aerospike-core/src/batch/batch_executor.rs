@@ -17,6 +17,8 @@ use std::cmp;
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use tracing::{instrument, Instrument, Span};
+
 use crate::batch::BatchRead;
 use crate::cluster::partition::Partition;
 use crate::cluster::{Cluster, Node};
@@ -35,6 +37,7 @@ impl BatchExecutor {
         BatchExecutor { cluster }
     }
 
+    #[instrument(skip_all)]
     pub async fn execute_batch_read(
         &self,
         policy: &BatchPolicy,
@@ -56,6 +59,7 @@ impl BatchExecutor {
         Ok(res)
     }
 
+    #[instrument(skip_all)]
     async fn execute_batch_jobs(
         &self,
         jobs: Vec<BatchReadCommand>,
@@ -70,14 +74,18 @@ impl BatchExecutor {
         let mut handles: Vec<aerospike_rt::task::JoinHandle<Result<Vec<BatchReadCommand>>>> =
             vec![];
         for slice in jobs.chunks(size).map(|c| c.to_vec()) {
-            let handle = aerospike_rt::spawn(async move {
-                let mut res = Vec::with_capacity(slice.len());
-                for mut cmd in slice {
-                    cmd.execute().await?;
-                    res.push(cmd);
+            let span = Span::current();
+            let handle = aerospike_rt::spawn(
+                async move {
+                    let mut res = Vec::with_capacity(slice.len());
+                    for mut cmd in slice {
+                        cmd.execute().await?;
+                        res.push(cmd);
+                    }
+                    Ok(res)
                 }
-                Ok(res)
-            });
+                .instrument(span),
+            );
             handles.push(handle);
         }
         let res = futures::future::join_all(handles).await;

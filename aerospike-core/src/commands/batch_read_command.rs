@@ -15,6 +15,7 @@
 use aerospike_rt::time::{Duration, Instant};
 use std::collections::HashMap;
 use std::sync::Arc;
+use tracing::instrument;
 
 use crate::cluster::Node;
 use crate::commands::{self, Command};
@@ -45,6 +46,7 @@ impl BatchReadCommand {
         }
     }
 
+    #[instrument(skip_all)]
     pub async fn execute(&mut self) -> Result<()> {
         let mut iterations = 0;
         let base_policy = self.policy.base().clone();
@@ -199,24 +201,29 @@ impl BatchReadCommand {
 
 #[async_trait::async_trait]
 impl commands::Command for BatchReadCommand {
+    #[instrument(skip_all)]
     fn write_timeout(&mut self, conn: &mut Connection, timeout: Option<Duration>) -> Result<()> {
         conn.buffer.write_timeout(timeout);
         Ok(())
     }
 
+    #[instrument(skip_all)]
     async fn write_buffer(&mut self, conn: &mut Connection) -> Result<()> {
         conn.flush().await
     }
 
+    #[instrument(skip_all)]
     fn prepare_buffer(&mut self, conn: &mut Connection) -> Result<()> {
         conn.buffer
             .set_batch_read(&self.policy, &self.batch_reads)
     }
 
+    #[instrument(skip_all)]
     async fn get_node(&self) -> Result<Arc<Node>> {
         Ok(self.node.clone())
     }
 
+    #[instrument(skip_all)]
     async fn parse_result(&mut self, conn: &mut Connection) -> Result<()> {
         loop {
             conn.read_buffer(8).await?;

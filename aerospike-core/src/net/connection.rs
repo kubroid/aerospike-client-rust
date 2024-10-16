@@ -26,6 +26,7 @@ use aerospike_rt::time::{Duration, Instant};
 #[cfg(all(any(feature = "rt-async-std"), not(feature = "rt-tokio")))]
 use futures::{AsyncReadExt, AsyncWriteExt};
 use std::ops::Add;
+use tracing::instrument;
 
 #[derive(Debug)]
 pub struct Connection {
@@ -68,6 +69,7 @@ impl Connection {
         let _s = self.conn.shutdown().await;
     }
 
+    #[instrument(skip_all)]
     pub async fn flush(&mut self) -> Result<()> {
         self.conn.write_all(&self.buffer.data_buffer).await?;
         self.conn.flush().await?;
@@ -75,6 +77,7 @@ impl Connection {
         Ok(())
     }
 
+    #[instrument(skip(self))]
     pub async fn read_buffer(&mut self, size: usize) -> Result<()> {
         self.buffer.resize_buffer(size)?;
         self.conn.read_exact(&mut self.buffer.data_buffer).await?;
@@ -84,12 +87,14 @@ impl Connection {
         Ok(())
     }
 
+    #[instrument(skip_all)]
     pub async fn write(&mut self, buf: &[u8]) -> Result<()> {
         self.conn.write_all(buf).await?;
         self.refresh();
         Ok(())
     }
 
+    #[instrument(skip_all)]
     pub async fn read(&mut self, buf: &mut [u8]) -> Result<()> {
         self.conn.read_exact(buf).await?;
         self.bytes_read += buf.len();

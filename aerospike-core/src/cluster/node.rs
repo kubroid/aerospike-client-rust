@@ -27,6 +27,7 @@ use crate::errors::{ErrorKind, Result};
 use crate::net::{ConnectionPool, Host, PooledConnection};
 use crate::policy::ClientPolicy;
 use aerospike_rt::RwLock;
+use tracing::instrument;
 
 pub const PARTITIONS: usize = 4096;
 
@@ -225,6 +226,7 @@ impl Node {
     }
 
     // Get a connection to the node from the connection pool
+    #[instrument(skip_all)]
     pub async fn get_connection(&self) -> Result<PooledConnection> {
         self.connection_pool.get().await
     }
