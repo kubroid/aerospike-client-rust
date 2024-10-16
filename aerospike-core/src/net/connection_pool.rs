@@ -69,6 +69,7 @@ impl Queue {
                 if let Some(IdleConnection(mut conn)) = internals.connections.pop_front() {
                     if conn.is_idle() {
                         internals.num_conns -= 1;
+                        drop(internals);
                         conn.close().await;
                         continue;
                     }
