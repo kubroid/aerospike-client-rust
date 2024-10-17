@@ -24,6 +24,7 @@ use crate::commands::BatchReadCommand;
 use crate::errors::Result;
 use crate::policy::{BatchPolicy, Concurrency};
 use crate::Key;
+use futures::lock::Mutex;
 
 pub struct BatchExecutor {
     cluster: Arc<Cluster>,

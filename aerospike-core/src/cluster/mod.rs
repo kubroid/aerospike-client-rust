@@ -33,10 +33,10 @@ use self::partition_tokenizer::PartitionTokenizer;
 use crate::errors::{ErrorKind, Result};
 use crate::net::Host;
 use crate::policy::ClientPolicy;
-use aerospike_rt::Mutex;
 use aerospike_rt::RwLock;
 use futures::channel::mpsc;
 use futures::channel::mpsc::{Receiver, Sender};
+use futures::lock::Mutex;
 
 // Cluster encapsulates the aerospike cluster nodes and manages
 // them.
