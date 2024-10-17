@@ -104,18 +104,15 @@ impl Node {
             "partition-generation",
             self.services_name(),
         ];
-        let info_map = self
-            .info(&commands)
-            .await
-            .chain_err(|| "Info command failed")?;
-        self.validate_node(&info_map)
-            .chain_err(|| "Failed to validate node")?;
+        let info_map = self.info(&commands).await?;
+        //.chain_err(|| "Info command failed")?;
+        self.validate_node(&info_map)?;
+        //.chain_err(|| "Failed to validate node")?;
         self.responded.store(true, Ordering::Relaxed);
-        let friends = self
-            .add_friends(current_aliases, &info_map)
-            .chain_err(|| "Failed to add friends")?;
-        self.update_partitions(&info_map)
-            .chain_err(|| "Failed to update partitions")?;
+        let friends = self.add_friends(current_aliases, &info_map)?;
+        //.chain_err(|| "Failed to add friends")?;
+        self.update_partitions(&info_map)?;
+        //.chain_err(|| "Failed to update partitions")?;
         self.reset_failures();
         Ok(friends)
     }
