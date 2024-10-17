@@ -39,6 +39,9 @@ impl BatchExecutor {
         policy: &BatchPolicy,
         batch_reads: Vec<BatchRead>,
     ) -> Result<Vec<BatchRead>> {
+        if batch_reads.is_empty() {
+            return Ok(batch_reads);
+        }
         let mut batch_nodes = self.get_batch_nodes(&batch_reads).await?;
         let jobs = batch_nodes
             .drain()

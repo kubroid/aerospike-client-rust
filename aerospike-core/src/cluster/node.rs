@@ -23,7 +23,7 @@ use std::sync::Arc;
 
 use crate::cluster::node_validator::NodeValidator;
 use crate::commands::Message;
-use crate::errors::{ErrorKind, Result, ResultExt};
+use crate::errors::{ErrorKind, Result};
 use crate::net::{ConnectionPool, Host, PooledConnection};
 use crate::policy::ClientPolicy;
 use aerospike_rt::RwLock;
