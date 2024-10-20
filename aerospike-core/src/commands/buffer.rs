@@ -344,7 +344,7 @@ impl Buffer {
     pub fn set_batch_read(
         &mut self,
         policy: &BatchPolicy,
-        batch_reads: Vec<BatchRead>,
+        batch_reads: &Vec<BatchRead>,
     ) -> Result<()> {
         let field_count_row = if policy.send_set_name { 2 } else { 1 };
 
@@ -358,7 +358,7 @@ impl Buffer {
         }
 
         let mut prev: Option<&BatchRead> = None;
-        for batch_read in &batch_reads {
+        for batch_read in batch_reads {
             self.data_offset += batch_read.key.digest.len() + 4;
             match prev {
                 Some(prev) if batch_read.match_header(prev, policy.send_set_name) => {

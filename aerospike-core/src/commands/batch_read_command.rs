@@ -210,7 +210,7 @@ impl commands::Command for BatchReadCommand {
 
     fn prepare_buffer(&mut self, conn: &mut Connection) -> Result<()> {
         conn.buffer
-            .set_batch_read(&self.policy, self.batch_reads.clone())
+            .set_batch_read(&self.policy, &self.batch_reads)
     }
 
     async fn get_node(&self) -> Result<Arc<Node>> {
