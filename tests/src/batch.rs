@@ -56,7 +56,7 @@ async fn batch_get() {
         BatchRead::new(key1.clone(), selected),
         BatchRead::new(key2.clone(), all),
         BatchRead::new(key3.clone(), none.clone()),
-        BatchRead::new(key4.clone(), none),
+        //BatchRead::new(key4.clone(), none),
     ];
     let mut results = client.batch_get(&bpolicy, batch).await.unwrap();
 

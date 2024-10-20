@@ -129,6 +129,7 @@ impl BatchReadCommand {
         bail!(ErrorKind::Connection("Timeout".to_string()))
     }
 
+    #[instrument(skip_all)]
     async fn parse_group(&mut self, conn: &mut Connection, size: usize) -> Result<bool> {
         while conn.bytes_read() < size {
             conn.read_buffer(commands::buffer::MSG_REMAINING_HEADER_SIZE as usize)
@@ -147,6 +148,7 @@ impl BatchReadCommand {
         Ok(true)
     }
 
+    #[instrument(skip_all)]
     async fn parse_record(&mut self, conn: &mut Connection) -> Result<Option<BatchRecord>> {
         let found_key = match ResultCode::from(conn.buffer.read_u8(Some(5))) {
             ResultCode::Ok => true,
