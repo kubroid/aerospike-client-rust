@@ -70,6 +70,7 @@ impl Connection {
 
     pub async fn flush(&mut self) -> Result<()> {
         self.conn.write_all(&self.buffer.data_buffer).await?;
+        self.conn.flush().await?;
         self.refresh();
         Ok(())
     }
