@@ -49,7 +49,10 @@ impl From<u8> for ParticleType {
             20 => ParticleType::LIST,
             21 => ParticleType::LDT,
             23 => ParticleType::GEOJSON,
-            _ => unreachable!(),
+            u => {
+                println!("Unknown particle type: {}", u);
+                unreachable!()
+            }
         }
     }
 }
